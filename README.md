@@ -211,10 +211,11 @@ Atlas** for the database (the local-Mongo default in `.env` is dev-only):
    you want the example sub-agents.
 
 One thing to know: a deep research turn (orchestrator + several sub-agents) can
-run for tens of seconds. The chat route sets `maxDuration = 300`, but serverless
-platforms clamp this to their plan limit — on a constrained plan, keep tasks
-modest or host somewhere without a hard function timeout. Because sub-agents run
-in-process, the whole turn completes within a single function invocation.
+run for tens of seconds. The chat route sets `maxDuration = 60` (the Vercel
+Hobby/free function ceiling); on Vercel Pro or a host without a hard timeout you
+can raise it to 300. On the free tier, keep demo queries modest (one or two
+sub-agents). Because sub-agents run in-process, the whole turn completes within a
+single function invocation.
 
 ---
 

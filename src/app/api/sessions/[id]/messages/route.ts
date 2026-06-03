@@ -4,9 +4,10 @@ import type { ChatStreamEvent } from "@/lib/types/sse";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// Research turns (web search + sub-agents) can run long; raise the ceiling.
-// Hosts clamp this to their own limit (e.g. Vercel plan limits).
-export const maxDuration = 300;
+// Research turns (web search + sub-agents) can run long. 60s is the Vercel
+// Hobby (free) function ceiling; raise this to 300 on Vercel Pro or hosts
+// without a hard timeout.
+export const maxDuration = 60;
 
 type Params = { params: Promise<{ id: string }> };
 

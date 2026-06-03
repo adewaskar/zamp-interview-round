@@ -15,8 +15,25 @@
 .textarea {
   flex: 1;
   border-radius: 12px !important;
+}
+/* antd Mentions applies the className to its wrapper; style the inner textarea. */
+.textarea :global(textarea) {
+  border-radius: 12px !important;
   padding: 10px 14px !important;
   resize: none;
+}
+
+.option {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.optName {
+  font-weight: 600;
+}
+.optSlug {
+  color: #9aa0aa;
+  font-size: 12px;
 }
 
 .send {

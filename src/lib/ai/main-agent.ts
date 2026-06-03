@@ -11,6 +11,7 @@ import type { ChatMessage } from "@/lib/types/parts";
 import type { ChatStreamEvent } from "@/lib/types/sse";
 import type { AgentRunContext } from "./context";
 import { runAgentTurn } from "./engine";
+import { applyAgentMentions } from "./mentions";
 import { toModelMessages } from "./messages";
 import { buildMainAgentSystemPrompt } from "./prompts";
 import { languageModel } from "./registry";
@@ -40,7 +41,9 @@ export async function runMainAgent({
   const session = await getSession(sessionId);
   if (!session) throw new Error("Session not found.");
 
-  // 1. Persist the user turn.
+  const enabledAgents = (await listAgents()).filter((a) => a.enabled);
+
+  // 1. Persist the RAW user turn (the UI shows exactly what was typed).
   await appendMessage(sessionId, {
     role: "user",
     content: [{ type: "text", text: userText }],
@@ -54,14 +57,15 @@ export async function runMainAgent({
   });
   emit({ type: "message-start", messageId: assistantId });
 
-  // 3. Build model input from full history (including the just-added user turn).
+  // 3. Build model input from full history. For the current turn, expand
+  //    `@slug` mentions into `<agent>slug</agent>` directives the orchestrator
+  //    treats as an explicit request to use that sub-agent.
   const userMessage: ChatMessage = {
     role: "user",
-    content: [{ type: "text", text: userText }],
+    content: [{ type: "text", text: applyAgentMentions(userText, enabledAgents) }],
   };
   const modelMessages = toModelMessages([...session.messages, userMessage]);
 
-  const enabledAgents = (await listAgents()).filter((a) => a.enabled);
   const runContext: AgentRunContext = { sessionId, depth: 0, signal, emit };
 
   const { parts } = await runAgentTurn({

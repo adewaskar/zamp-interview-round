@@ -7,6 +7,8 @@ import type { ChatStreamEvent } from "@/lib/types/sse";
  */
 export interface AgentRunContext {
   sessionId: string;
+  /** Owner of the session — scopes data access (sub-agent lookups, etc.). */
+  userId: string;
   /** Push an SSE event to the client. */
   emit: (event: ChatStreamEvent) => void;
   /** 0 = orchestrator. Sub-agents run at depth 1. Guards delegation recursion. */

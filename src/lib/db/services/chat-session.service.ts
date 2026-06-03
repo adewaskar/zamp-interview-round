@@ -29,15 +29,19 @@ function toSessionDTO(doc: any): SessionDTO {
   };
 }
 
-export async function createSession(): Promise<SessionDTO> {
+export async function createSession(userId: string): Promise<SessionDTO> {
   await connectToDatabase();
-  const doc = await ChatSession.create({ title: DEFAULT_TITLE, model: DEFAULT_MODEL });
+  const doc = await ChatSession.create({
+    userId,
+    title: DEFAULT_TITLE,
+    model: DEFAULT_MODEL,
+  });
   return toSessionDTO(doc.toObject());
 }
 
-export async function listSessions(): Promise<SessionListItem[]> {
+export async function listSessions(userId: string): Promise<SessionListItem[]> {
   await connectToDatabase();
-  const docs = await ChatSession.find()
+  const docs = await ChatSession.find({ userId })
     .select("title createdAt updatedAt")
     .sort({ updatedAt: -1 })
     .lean();
@@ -49,34 +53,44 @@ export async function listSessions(): Promise<SessionListItem[]> {
   }));
 }
 
-export async function getSession(id: string): Promise<SessionDTO | null> {
+export async function getSession(
+  id: string,
+  userId: string,
+): Promise<SessionDTO | null> {
   if (!mongoose.isValidObjectId(id)) return null;
   await connectToDatabase();
-  const doc = await ChatSession.findById(id).lean();
+  const doc = await ChatSession.findOne({ _id: id, userId }).lean();
   return doc ? toSessionDTO(doc) : null;
 }
 
-export async function deleteSession(id: string): Promise<boolean> {
+export async function deleteSession(
+  id: string,
+  userId: string,
+): Promise<boolean> {
   if (!mongoose.isValidObjectId(id)) return false;
   await connectToDatabase();
-  const res = await ChatSession.findByIdAndDelete(id).lean();
+  const res = await ChatSession.findOneAndDelete({ _id: id, userId }).lean();
   return Boolean(res);
 }
 
-export async function getMessages(sessionId: string): Promise<ChatMessage[]> {
-  const session = await getSession(sessionId);
+export async function getMessages(
+  sessionId: string,
+  userId: string,
+): Promise<ChatMessage[]> {
+  const session = await getSession(sessionId, userId);
   return session ? session.messages : [];
 }
 
 /** Append a message and return the generated subdocument id. */
 export async function appendMessage(
   sessionId: string,
+  userId: string,
   message: { role: ChatRole; content: MessagePart[] },
 ): Promise<string> {
   await connectToDatabase();
   const messageId = new mongoose.Types.ObjectId();
   await ChatSession.updateOne(
-    { _id: sessionId },
+    { _id: sessionId, userId },
     {
       $push: {
         messages: { _id: messageId, role: message.role, content: message.content },
@@ -92,12 +106,13 @@ export async function appendMessage(
  */
 export async function updateMessageContent(
   sessionId: string,
+  userId: string,
   messageId: string,
   content: MessagePart[],
 ): Promise<void> {
   await connectToDatabase();
   await ChatSession.updateOne(
-    { _id: sessionId, "messages._id": messageId },
+    { _id: sessionId, userId, "messages._id": messageId },
     { $set: { "messages.$.content": content } },
   );
 }
@@ -105,12 +120,13 @@ export async function updateMessageContent(
 /** Set the session title only if it is still the default — used to auto-title from the first message. */
 export async function setTitleIfDefault(
   sessionId: string,
+  userId: string,
   title: string,
 ): Promise<void> {
   await connectToDatabase();
   const clean = title.trim().slice(0, 80) || DEFAULT_TITLE;
   await ChatSession.updateOne(
-    { _id: sessionId, title: DEFAULT_TITLE },
+    { _id: sessionId, userId, title: DEFAULT_TITLE },
     { $set: { title: clean } },
   );
 }

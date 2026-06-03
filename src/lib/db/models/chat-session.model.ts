@@ -43,6 +43,12 @@ const MessageSchema = new Schema(
 
 const ChatSessionSchema = new Schema(
   {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: ModelName.USER,
+      required: true,
+      index: true,
+    },
     title: { type: String, default: "New chat" },
     model: { type: String, default: "gpt-4.1" },
     messages: { type: [MessageSchema], default: [] },
@@ -50,8 +56,8 @@ const ChatSessionSchema = new Schema(
   { timestamps: true, collection: Collection.CHAT_SESSION },
 );
 
-// The sidebar lists sessions newest-first.
-ChatSessionSchema.index({ updatedAt: -1 });
+// The sidebar lists a user's sessions newest-first.
+ChatSessionSchema.index({ userId: 1, updatedAt: -1 });
 
 export type ChatSessionDoc = mongoose.InferSchemaType<typeof ChatSessionSchema>;
 

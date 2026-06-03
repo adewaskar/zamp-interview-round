@@ -35,6 +35,7 @@ export async function runSubAgent(
 
   const childContext: AgentRunContext = {
     sessionId: parent.sessionId,
+    userId: parent.userId,
     depth: parent.depth + 1,
     signal: parent.signal,
     emit: () => {}, // leaf tools don't emit; nested events come from the callbacks below

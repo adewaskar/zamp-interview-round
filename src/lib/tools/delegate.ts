@@ -76,7 +76,7 @@ export const delegateTool = tool({
       [];
 
     for (const t of tasks) {
-      const agent = await getAgentBySlug(t.agentSlug);
+      const agent = await getAgentBySlug(t.agentSlug, run.userId);
       if (!agent) {
         rejected.push({ taskId: t.taskId, agentSlug: t.agentSlug, reason: "No such sub-agent." });
       } else if (!agent.enabled) {

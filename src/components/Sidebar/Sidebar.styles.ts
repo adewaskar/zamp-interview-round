@@ -83,3 +83,20 @@ export const ThemeToggleLabel = styled(Text)`
   color: ${({ theme }) => theme.colorTextSecondary};
   font-size: 13px;
 `;
+
+export const UserRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid ${({ theme }) => theme.colorBorderSecondary};
+`;
+
+export const UserEmail = styled(Text)`
+  flex: 1;
+  min-width: 0;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: 12.5px;
+`;

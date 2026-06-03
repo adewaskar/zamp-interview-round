@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { App, ConfigProvider, Space, theme as antdTheme } from "antd";
+import { App, ConfigProvider, Space, Spin, theme as antdTheme } from "antd";
 import { TeamOutlined } from "@ant-design/icons";
 import { useDrawer } from "@highstack/antd-utils";
 import type { ChatMessage, MessagePart } from "@/lib/types/parts";
-import type { SessionDTO, SessionListItem } from "@/lib/types/api";
+import type { SessionDTO, SessionListItem, UserDTO } from "@/lib/types/api";
 import { api } from "@/lib/client/api";
+import { auth } from "@/lib/client/auth";
 import {
   optimisticUserMessage,
   useChatStream,
@@ -16,7 +17,8 @@ import { TokenThemeBridge } from "@/lib/styled/TokenThemeBridge";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatWindow } from "@/components/ChatWindow";
 import { AgentManager } from "@/components/AgentManager";
-import { Shell, Rail, Main } from "./page.styles";
+import { AuthModal } from "@/components/AuthModal";
+import { Shell, Rail, Main, AuthBackdrop } from "./page.styles";
 
 /**
  * Scout workspace. Owns all client state and orchestrates the composed
@@ -24,8 +26,18 @@ import { Shell, Rail, Main } from "./page.styles";
  * The antd `<App>` (for context-aware `message`/`modal`) and the imperative
  * modal/drawer provider live in the root layout, so this tree can freely use
  * `App.useApp()` and `useDrawer()`.
+ *
+ * Only mounts once the user is authenticated (the `AuthGate` below gates on
+ * `user`), so its `loadSessions()` / agent fetches always run for a logged-in
+ * user whose data is scoped server-side via the auth cookie.
  */
-function Workspace() {
+function Workspace({
+  user,
+  onLogout,
+}: {
+  user: UserDTO;
+  onLogout: () => void;
+}) {
   const { message } = App.useApp();
   const { openDrawer } = useDrawer();
   const chat = useChatStream();
@@ -218,6 +230,8 @@ function Workspace() {
               onSelect={selectSession}
               onDelete={deleteSession}
               onManageAgents={openAgents}
+              user={user}
+              onLogout={onLogout}
             />
           </TokenThemeBridge>
         </ConfigProvider>
@@ -239,6 +253,74 @@ function Workspace() {
   );
 }
 
+/**
+ * Authentication gate around the workspace. Checks the session on mount via
+ * `auth.me()` (the auth cookie rides along automatically). While the check is
+ * pending it shows a centered spinner; if unauthenticated it shows the blocking
+ * `AuthModal`; once a `user` is known it mounts the `Workspace`. Gating on
+ * `user` ensures the workspace's data fetches only run for a logged-in user.
+ */
+function AuthGate() {
+  const [user, setUser] = useState<UserDTO | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        const me = await auth.me();
+        if (active) setUser(me);
+      } catch {
+        if (active) setUser(null);
+      } finally {
+        if (active) setAuthChecked(true);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    await auth.logout();
+    setUser(null);
+  }, []);
+
+  if (!authChecked) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100dvh",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <ConfigProvider
+        theme={{
+          algorithm: antdTheme.darkAlgorithm,
+          token: { colorPrimary: BRAND_PRIMARY },
+        }}
+      >
+        <TokenThemeBridge>
+          <AuthBackdrop>
+            <AuthModal onAuthed={setUser} />
+          </AuthBackdrop>
+        </TokenThemeBridge>
+      </ConfigProvider>
+    );
+  }
+
+  return <Workspace user={user} onLogout={handleLogout} />;
+}
+
 export default function Page() {
-  return <Workspace />;
+  return <AuthGate />;
 }

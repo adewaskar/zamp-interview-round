@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("sub-agent manager", () => {
   test("validates, creates, and deletes a sub-agent", async ({ page }) => {

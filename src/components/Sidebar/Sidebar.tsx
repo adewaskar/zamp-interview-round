@@ -5,6 +5,7 @@ import {
   BulbFilled,
   BulbOutlined,
   CompassFilled,
+  LogoutOutlined,
   PlusOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
@@ -25,6 +26,8 @@ import {
   SidebarRoot,
   ThemeToggleLabel,
   ThemeToggleRow,
+  UserEmail,
+  UserRow,
 } from "./Sidebar.styles";
 
 /**
@@ -40,6 +43,8 @@ export function Sidebar({
   onSelect,
   onDelete,
   onManageAgents,
+  user,
+  onLogout,
 }: {
   sessions: SessionListItem[];
   activeId: string | null;
@@ -49,6 +54,8 @@ export function Sidebar({
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   onManageAgents: () => void;
+  user?: { email: string };
+  onLogout?: () => void;
 }) {
   const { mode, toggle } = useThemeMode();
 
@@ -101,6 +108,20 @@ export function Sidebar({
         <Button block ghost icon={<TeamOutlined />} onClick={onManageAgents}>
           Manage agents
         </Button>
+
+        {user && (
+          <UserRow>
+            <UserEmail ellipsis title={user.email}>
+              {user.email}
+            </UserEmail>
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              onClick={onLogout}
+              aria-label="Log out"
+            />
+          </UserRow>
+        )}
       </Footer>
     </SidebarRoot>
   );

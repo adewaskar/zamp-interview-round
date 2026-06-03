@@ -1,5 +1,8 @@
 "use client";
 
+// antd v5 targets React 16–18; this patch restores full React 19 compatibility
+// (Form/Modal connection, message/notification static methods, wave effects).
+import "@ant-design/v5-patch-for-react-19";
 import { App, ConfigProvider, theme as antdTheme } from "antd";
 import { HighstackAntDProvider } from "@highstack/antd-utils";
 import { theme } from "@/lib/theme";

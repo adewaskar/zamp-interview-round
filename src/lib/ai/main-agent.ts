@@ -20,6 +20,7 @@ const MAIN_AGENT_MAX_STEPS = 14;
 
 export interface RunMainAgentArgs {
   sessionId: string;
+  userId: string;
   userText: string;
   emit: (event: ChatStreamEvent) => void;
   signal?: AbortSignal;
@@ -31,27 +32,31 @@ export interface RunMainAgentArgs {
  *  2. create the assistant message and announce its id,
  *  3. stream the turn — emitting SSE events and checkpointing parts to Mongo,
  *  4. signal completion.
+ *
+ * All data access is scoped to `userId` — the session must belong to the user
+ * and only the user's sub-agents are visible for delegation.
  */
 export async function runMainAgent({
   sessionId,
+  userId,
   userText,
   emit,
   signal,
 }: RunMainAgentArgs): Promise<void> {
-  const session = await getSession(sessionId);
+  const session = await getSession(sessionId, userId);
   if (!session) throw new Error("Session not found.");
 
-  const enabledAgents = (await listAgents()).filter((a) => a.enabled);
+  const enabledAgents = (await listAgents(userId)).filter((a) => a.enabled);
 
   // 1. Persist the RAW user turn (the UI shows exactly what was typed).
-  await appendMessage(sessionId, {
+  await appendMessage(sessionId, userId, {
     role: "user",
     content: [{ type: "text", text: userText }],
   });
-  await setTitleIfDefault(sessionId, userText);
+  await setTitleIfDefault(sessionId, userId, userText);
 
   // 2. Create the (empty) assistant message we'll stream into.
-  const assistantId = await appendMessage(sessionId, {
+  const assistantId = await appendMessage(sessionId, userId, {
     role: "assistant",
     content: [],
   });
@@ -66,7 +71,7 @@ export async function runMainAgent({
   };
   const modelMessages = toModelMessages([...session.messages, userMessage]);
 
-  const runContext: AgentRunContext = { sessionId, depth: 0, signal, emit };
+  const runContext: AgentRunContext = { sessionId, userId, depth: 0, signal, emit };
 
   const { parts } = await runAgentTurn({
     model: languageModel(session.model || DEFAULT_MODEL),
@@ -81,10 +86,11 @@ export async function runMainAgent({
       emit({ type: "tool-call", toolCallId: p.toolCallId, toolName: p.toolName, args: p.args }),
     onToolResult: (p) =>
       emit({ type: "tool-result", toolCallId: p.toolCallId, toolName: p.toolName, result: p.result }),
-    onCheckpoint: (current) => updateMessageContent(sessionId, assistantId, current),
+    onCheckpoint: (current) =>
+      updateMessageContent(sessionId, userId, assistantId, current),
   });
 
   // 4. Belt-and-suspenders final persist, then done.
-  await updateMessageContent(sessionId, assistantId, parts);
+  await updateMessageContent(sessionId, userId, assistantId, parts);
   emit({ type: "done", messageId: assistantId });
 }

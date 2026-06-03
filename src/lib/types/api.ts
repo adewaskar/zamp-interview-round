@@ -17,6 +17,13 @@ export interface AgentDTO {
 
 export type { CreateAgentBody, UpdateAgentBody } from "@/lib/schemas/agent";
 
+/** The authenticated user (no secrets). */
+export interface UserDTO {
+  id: string;
+  email: string;
+  name?: string;
+}
+
 /** Lightweight row for the chat sidebar list. */
 export interface SessionListItem {
   id: string;

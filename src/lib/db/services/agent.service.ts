@@ -34,41 +34,51 @@ function toDTO(doc: any): AgentDTO {
   };
 }
 
-/** Ensure the slug is unique by appending -2, -3, … on collision. */
-async function ensureUniqueSlug(base: string, excludeId?: string): Promise<string> {
+/** Ensure the slug is unique *for this user* by appending -2, -3, … on collision. */
+async function ensureUniqueSlug(
+  base: string,
+  userId: string,
+  excludeId?: string,
+): Promise<string> {
   const root = base || "agent";
   let candidate = root;
   let n = 1;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
-    const existing = await Agent.findOne({ slug: candidate }).lean();
+    const existing = await Agent.findOne({ userId, slug: candidate }).lean();
     if (!existing || String(existing._id) === excludeId) return candidate;
     n += 1;
     candidate = `${root}-${n}`;
   }
 }
 
-export async function listAgents(): Promise<AgentDTO[]> {
+export async function listAgents(userId: string): Promise<AgentDTO[]> {
   await connectToDatabase();
-  const docs = await Agent.find().sort({ createdAt: 1 }).lean();
+  const docs = await Agent.find({ userId }).sort({ createdAt: 1 }).lean();
   return docs.map(toDTO);
 }
 
-export async function getAgentBySlug(slug: string): Promise<AgentDTO | null> {
+export async function getAgentBySlug(
+  slug: string,
+  userId: string,
+): Promise<AgentDTO | null> {
   await connectToDatabase();
-  const doc = await Agent.findOne({ slug }).lean();
+  const doc = await Agent.findOne({ userId, slug }).lean();
   return doc ? toDTO(doc) : null;
 }
 
-export async function createAgent(body: CreateAgentBody): Promise<AgentDTO> {
+export async function createAgent(
+  userId: string,
+  body: CreateAgentBody,
+): Promise<AgentDTO> {
   await connectToDatabase();
   const name = body.name?.trim();
   if (!name) throw new Error("name is required");
   if (!body.description?.trim()) throw new Error("description is required");
   if (!body.instructions?.trim()) throw new Error("instructions is required");
 
-  const slug = await ensureUniqueSlug(slugify(body.slug || name));
+  const slug = await ensureUniqueSlug(slugify(body.slug || name), userId);
   const doc = await Agent.create({
+    userId,
     slug,
     name,
     description: body.description.trim(),
@@ -82,6 +92,7 @@ export async function createAgent(body: CreateAgentBody): Promise<AgentDTO> {
 
 export async function updateAgent(
   id: string,
+  userId: string,
   body: UpdateAgentBody,
 ): Promise<AgentDTO | null> {
   await connectToDatabase();
@@ -94,15 +105,17 @@ export async function updateAgent(
   if (body.model !== undefined) update.model = body.model;
   if (body.enabled !== undefined) update.enabled = body.enabled;
   if (body.slug !== undefined) {
-    update.slug = await ensureUniqueSlug(slugify(body.slug), id);
+    update.slug = await ensureUniqueSlug(slugify(body.slug), userId, id);
   }
 
-  const doc = await Agent.findByIdAndUpdate(id, update, { new: true }).lean();
+  const doc = await Agent.findOneAndUpdate({ _id: id, userId }, update, {
+    new: true,
+  }).lean();
   return doc ? toDTO(doc) : null;
 }
 
-export async function deleteAgent(id: string): Promise<boolean> {
+export async function deleteAgent(id: string, userId: string): Promise<boolean> {
   await connectToDatabase();
-  const res = await Agent.findByIdAndDelete(id).lean();
+  const res = await Agent.findOneAndDelete({ _id: id, userId }).lean();
   return Boolean(res);
 }

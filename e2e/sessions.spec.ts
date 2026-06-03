@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("chat sessions", () => {
   test("starting a new chat reveals the composer", async ({ page }) => {

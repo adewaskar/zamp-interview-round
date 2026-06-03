@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("app shell", () => {
   test("renders the welcome screen and branded sidebar", async ({ page }) => {

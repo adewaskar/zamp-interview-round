@@ -1,12 +1,18 @@
 /**
- * Seed a few example sub-agents so the orchestrator has specialists to delegate
- * to on first run. Self-contained (talks to Mongo directly) so it needs no app
- * wiring. Safe to re-run — it upserts by slug.
+ * Seed a demo user plus a few example sub-agents so the orchestrator has
+ * specialists to delegate to on first run. Self-contained (talks to Mongo
+ * directly) so it needs no app wiring. Safe to re-run — it upserts.
  *
  *   pnpm seed
+ *
+ * Log in with the printed demo credentials to see the seeded sub-agents.
  */
 import "dotenv/config";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+
+const DEMO_EMAIL = "demo@scout.app";
+const DEMO_PASSWORD = "demodemo";
 
 type SeedAgent = {
   slug: string;
@@ -59,19 +65,40 @@ async function main() {
   if (!uri) throw new Error("MONGODB_URI is not set. Copy .env.example to .env.");
 
   await mongoose.connect(uri);
-  const agents = mongoose.connection.collection("agents");
 
+  // Upsert the demo user and resolve its id.
+  const users = mongoose.connection.collection("users");
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+  const now = new Date();
+  await users.updateOne(
+    { email: DEMO_EMAIL },
+    {
+      $set: { email: DEMO_EMAIL, passwordHash, name: "Demo", updatedAt: now },
+      $setOnInsert: { createdAt: now },
+    },
+    { upsert: true },
+  );
+  const user = await users.findOne({ email: DEMO_EMAIL });
+  const userId = user!._id;
+
+  // Upsert the sub-agents under the demo user (slug is unique per user).
+  const agents = mongoose.connection.collection("agents");
   for (const a of AGENTS) {
     await agents.updateOne(
-      { slug: a.slug },
-      { $set: { ...a, updatedAt: new Date() }, $setOnInsert: { createdAt: new Date() } },
+      { userId, slug: a.slug },
+      {
+        $set: { ...a, userId, updatedAt: new Date() },
+        $setOnInsert: { createdAt: new Date() },
+      },
       { upsert: true },
     );
     console.log(`seeded sub-agent: ${a.slug}`);
   }
 
   await mongoose.disconnect();
-  console.log(`done — ${AGENTS.length} sub-agents ready.`);
+  console.log(
+    `done — demo user "${DEMO_EMAIL}" (password "${DEMO_PASSWORD}") with ${AGENTS.length} sub-agents.`,
+  );
 }
 
 main().catch((err) => {

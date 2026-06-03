@@ -23,6 +23,8 @@ jobs:
           - 27017:27017
     env:
       MONGODB_URI: mongodb://127.0.0.1:27017/scout_e2e
+      # Auth tests sign JWTs; this is a throwaway secret for CI only.
+      JWT_SECRET: test-jwt-secret-for-e2e-only
       # E2E never calls the LLM / web search; placeholders satisfy any env reads
       # at module load so the server boots.
       OPENAI_API_KEY: test-openai-key

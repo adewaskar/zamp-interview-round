@@ -8,7 +8,13 @@ import { Collection, ModelName } from "./constants";
  */
 export const AgentSchema = new Schema(
   {
-    slug: { type: String, required: true, unique: true, trim: true },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: ModelName.USER,
+      required: true,
+      index: true,
+    },
+    slug: { type: String, required: true, trim: true },
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     instructions: { type: String, required: true },
@@ -18,6 +24,9 @@ export const AgentSchema = new Schema(
   },
   { timestamps: true, collection: Collection.AGENT },
 );
+
+// Slugs are unique per user, not globally.
+AgentSchema.index({ userId: 1, slug: 1 }, { unique: true });
 
 export type AgentDoc = InferSchemaType<typeof AgentSchema>;
 

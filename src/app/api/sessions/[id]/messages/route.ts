@@ -1,5 +1,6 @@
 import { runMainAgent } from "@/lib/ai/main-agent";
-import { errMessage, fail } from "@/lib/http";
+import { getCurrentUserId } from "@/lib/auth/session";
+import { errMessage, fail, unauthorized } from "@/lib/http";
 import type { ChatStreamEvent } from "@/lib/types/sse";
 
 export const runtime = "nodejs";
@@ -14,9 +15,13 @@ type Params = { params: Promise<{ id: string }> };
 /**
  * Chat endpoint. Streams the assistant turn as Server-Sent Events — one JSON
  * `ChatStreamEvent` per `data:` frame. (POST, so the client reads the body as a
- * stream rather than via EventSource.)
+ * stream rather than via EventSource.) Requires auth; the run is scoped to the
+ * authenticated user (the session must be theirs).
  */
 export async function POST(req: Request, { params }: Params) {
+  const userId = await getCurrentUserId();
+  if (!userId) return unauthorized();
+
   const { id } = await params;
 
   let message = "";
@@ -42,7 +47,13 @@ export async function POST(req: Request, { params }: Params) {
       };
 
       try {
-        await runMainAgent({ sessionId: id, userText: message, emit, signal: req.signal });
+        await runMainAgent({
+          sessionId: id,
+          userId,
+          userText: message,
+          emit,
+          signal: req.signal,
+        });
       } catch (e) {
         emit({ type: "error", message: errMessage(e) });
       } finally {

@@ -1,0 +1,33 @@
+name: Deploy to Vercel (production)
+
+# Every push to main builds + deploys to the production project
+# (zamp-interview-round.vercel.app). The build runs on Vercel's
+# infrastructure using the project's configured env vars + vercel.json.
+on:
+  push:
+    branches: [main]
+
+# Never run two production deploys at once; newer pushes supersede older ones.
+concurrency:
+  group: vercel-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy to production
+        run: vercel deploy --prod --yes

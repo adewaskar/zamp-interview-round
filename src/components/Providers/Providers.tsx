@@ -1,16 +1,45 @@
 "use client";
 
-import { App, ConfigProvider } from "antd";
+import { App, ConfigProvider, theme as antdTheme } from "antd";
 import { HighstackAntDProvider } from "@highstack/antd-utils";
 import { theme } from "@/lib/theme";
+import { ThemeModeProvider, useThemeMode } from "@/lib/theme-mode";
 import { StyledComponentsRegistry } from "@/lib/styled/registry";
 import { TokenThemeBridge } from "@/lib/styled/TokenThemeBridge";
 import { GlobalStyle } from "@/lib/styled/GlobalStyle";
 
 /**
+ * Inner client surface whose antd algorithm tracks the current theme mode, so
+ * flipping light/dark restyles the whole root surface (and everything bridged
+ * into styled-components via TokenThemeBridge) automatically.
+ */
+function ThemedApp({ children }: { children: React.ReactNode }) {
+  const { mode } = useThemeMode();
+  return (
+    <ConfigProvider
+      theme={{
+        ...theme,
+        algorithm:
+          mode === "dark"
+            ? antdTheme.darkAlgorithm
+            : antdTheme.defaultAlgorithm,
+      }}
+    >
+      <TokenThemeBridge>
+        <GlobalStyle />
+        <App style={{ height: "100dvh" }}>
+          <HighstackAntDProvider>{children}</HighstackAntDProvider>
+        </App>
+      </TokenThemeBridge>
+    </ConfigProvider>
+  );
+}
+
+/**
  * All client-side context the app depends on, composed once:
  *  - StyledComponentsRegistry — SSR style flushing for styled-components
- *  - ConfigProvider           — antd design tokens (light surface)
+ *  - ThemeModeProvider        — light/dark mode state (persisted to localStorage)
+ *  - ConfigProvider           — antd design tokens, algorithm reactive to mode
  *  - TokenThemeBridge         — exposes those tokens to styled-components
  *  - GlobalStyle              — token-driven document reset
  *  - App                      — context-aware message/modal/notification
@@ -19,14 +48,9 @@ import { GlobalStyle } from "@/lib/styled/GlobalStyle";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <StyledComponentsRegistry>
-      <ConfigProvider theme={theme}>
-        <TokenThemeBridge>
-          <GlobalStyle />
-          <App style={{ height: "100dvh" }}>
-            <HighstackAntDProvider>{children}</HighstackAntDProvider>
-          </App>
-        </TokenThemeBridge>
-      </ConfigProvider>
+      <ThemeModeProvider>
+        <ThemedApp>{children}</ThemedApp>
+      </ThemeModeProvider>
     </StyledComponentsRegistry>
   );
 }

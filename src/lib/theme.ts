@@ -31,7 +31,9 @@ export const theme: ThemeConfig = {
     colorPrimary: BRAND_PRIMARY,
     borderRadius: 8,
     fontSize: 14,
-    colorBgLayout: "#f6f7f9",
+    // colorBgLayout is intentionally NOT pinned: letting the active algorithm
+    // (default/dark) derive it is what lets the light/dark toggle flip the
+    // whole layout surface. The antd light default (#f5f5f5) ≈ the old #f6f7f9.
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },

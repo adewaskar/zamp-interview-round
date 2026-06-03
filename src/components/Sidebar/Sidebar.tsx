@@ -1,13 +1,16 @@
 "use client";
 
-import { Button } from "antd";
+import { Button, Switch } from "antd";
 import {
+  BulbFilled,
+  BulbOutlined,
   CompassFilled,
   PlusOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
 import type { SessionListItem } from "@/lib/types/api";
 import { APP_NAME } from "@/lib/config";
+import { useThemeMode } from "@/lib/theme-mode";
 import { SessionList } from "@/components/SessionList";
 import {
   AppName,
@@ -20,6 +23,8 @@ import {
   NewChatWrap,
   Sessions,
   SidebarRoot,
+  ThemeToggleLabel,
+  ThemeToggleRow,
 } from "./Sidebar.styles";
 
 /**
@@ -45,6 +50,8 @@ export function Sidebar({
   onDelete: (id: string) => void;
   onManageAgents: () => void;
 }) {
+  const { mode, toggle } = useThemeMode();
+
   return (
     <SidebarRoot>
       <Brand>
@@ -80,6 +87,17 @@ export function Sidebar({
       </Sessions>
 
       <Footer>
+        <ThemeToggleRow>
+          <ThemeToggleLabel>Dark mode</ThemeToggleLabel>
+          <Switch
+            size="small"
+            checked={mode === "dark"}
+            onChange={toggle}
+            checkedChildren={<BulbFilled />}
+            unCheckedChildren={<BulbOutlined />}
+            aria-label="Toggle dark mode"
+          />
+        </ThemeToggleRow>
         <Button block ghost icon={<TeamOutlined />} onClick={onManageAgents}>
           Manage agents
         </Button>

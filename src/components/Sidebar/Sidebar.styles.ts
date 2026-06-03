@@ -70,3 +70,16 @@ export const Sessions = styled.div`
 export const Footer = styled.div`
   padding: 12px 14px;
 `;
+
+export const ThemeToggleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 2px 10px;
+`;
+
+export const ThemeToggleLabel = styled(Text)`
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: 13px;
+`;

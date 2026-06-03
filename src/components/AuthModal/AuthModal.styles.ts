@@ -40,3 +40,11 @@ export const Subtitle = styled.p`
   color: ${({ theme }) => theme.colorTextSecondary};
   font-size: 13px;
 `;
+
+/** Modal title row: brand on the left, the light/dark toggle on the right. */
+export const TitleBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.padding}px;
+`;

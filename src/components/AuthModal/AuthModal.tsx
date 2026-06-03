@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { App, Button, Form, Input, Modal, Segmented } from "antd";
-import { CompassFilled } from "@ant-design/icons";
+import { App, Button, Form, Input, Modal, Segmented, Switch } from "antd";
+import { BulbFilled, BulbOutlined, CompassFilled } from "@ant-design/icons";
 import { useForm } from "@highstack/antd-utils";
 import {
   loginSchema,
@@ -13,12 +13,14 @@ import {
 import type { UserDTO } from "@/lib/types/api";
 import { APP_NAME } from "@/lib/config";
 import { auth } from "@/lib/client/auth";
+import { useThemeMode } from "@/lib/theme-mode";
 import {
   BrandHeader,
   BrandLogo,
   BrandName,
   ModeToggleWrap,
   Subtitle,
+  TitleBar,
 } from "./AuthModal.styles";
 
 type Mode = "login" | "signup";
@@ -35,6 +37,7 @@ type Mode = "login" | "signup";
  */
 export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
   const { message } = App.useApp();
+  const { mode: themeMode, toggle: toggleTheme } = useThemeMode();
   const [mode, setMode] = useState<Mode>("login");
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
@@ -83,12 +86,22 @@ export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
       keyboard={false}
       footer={null}
       title={
-        <BrandHeader>
-          <BrandLogo>
-            <CompassFilled />
-          </BrandLogo>
-          <BrandName>{APP_NAME}</BrandName>
-        </BrandHeader>
+        <TitleBar>
+          <BrandHeader>
+            <BrandLogo>
+              <CompassFilled />
+            </BrandLogo>
+            <BrandName>{APP_NAME}</BrandName>
+          </BrandHeader>
+          <Switch
+            size="small"
+            checked={themeMode === "dark"}
+            onChange={toggleTheme}
+            checkedChildren={<BulbFilled />}
+            unCheckedChildren={<BulbOutlined />}
+            aria-label="Toggle dark mode"
+          />
+        </TitleBar>
       }
     >
       <Subtitle>

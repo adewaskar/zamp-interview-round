@@ -302,19 +302,12 @@ function AuthGate() {
   }
 
   if (!user) {
+    // Themed by the root ConfigProvider, so the gate's own light/dark toggle
+    // (in AuthModal) flips it like the rest of the app.
     return (
-      <ConfigProvider
-        theme={{
-          algorithm: antdTheme.darkAlgorithm,
-          token: { colorPrimary: BRAND_PRIMARY },
-        }}
-      >
-        <TokenThemeBridge>
-          <AuthBackdrop>
-            <AuthModal onAuthed={setUser} />
-          </AuthBackdrop>
-        </TokenThemeBridge>
-      </ConfigProvider>
+      <AuthBackdrop>
+        <AuthModal onAuthed={setUser} />
+      </AuthBackdrop>
     );
   }
 

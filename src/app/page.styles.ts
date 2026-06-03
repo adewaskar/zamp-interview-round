@@ -46,5 +46,5 @@ export const AuthBackdrop = styled.div`
       ${({ theme }) => `color-mix(in srgb, ${theme.colorPrimary} 16%, transparent)`} 0%,
       transparent 50%
     ),
-    ${({ theme }) => theme.colorSiderBg};
+    ${({ theme }) => theme.colorBgLayout};
 `;

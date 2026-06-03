@@ -2,6 +2,8 @@
 
 **Live demo:** https://zamp-interview-round.vercel.app
 
+**Demo login:** `demo@scout.app` / `demodemo`
+
 Scout is a conversational research assistant. You chat with a **main agent** (the
 orchestrator); when a question is big or has independent parts, it hands work to
 **sub-agents** you define — specialists with their own instructions and tools —

@@ -1,0 +1,91 @@
+.card {
+  background: #fff;
+  border: 1px solid #e9ebf0;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+
+.card :global(.ant-collapse-header) {
+  align-items: center !important;
+  padding: 8px 12px !important;
+}
+
+.card :global(.ant-collapse-content-box) {
+  padding: 4px 12px 12px !important;
+}
+
+.header {
+  flex: 1;
+  min-width: 0;
+}
+
+.icon {
+  display: inline-flex;
+  font-size: 15px;
+}
+
+.argPreview {
+  font-size: 12px;
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.queries {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sources {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sources li {
+  line-height: 1.4;
+}
+
+.snippet {
+  margin: 4px 0 0 !important;
+  font-size: 12.5px;
+}
+
+.pdfUrl {
+  margin-bottom: 4px !important;
+  word-break: break-all;
+}
+
+.raw {
+  margin-top: 2px;
+}
+
+.raw :global(.ant-collapse-header) {
+  padding: 4px 0 !important;
+}
+
+.raw :global(.ant-collapse-content-box) {
+  padding: 4px 0 0 !important;
+}
+
+.pre {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  background: #0f1117;
+  color: #e6e6e6;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

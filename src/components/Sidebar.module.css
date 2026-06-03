@@ -1,0 +1,73 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 18px 18px 14px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+  font-size: 17px;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.appName {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.appSub {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11.5px;
+}
+
+.newChatWrap {
+  padding: 4px 14px 10px;
+}
+
+.newChat {
+  font-weight: 600;
+}
+
+.sessions {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.footer {
+  padding: 12px 14px;
+}
+
+.manage {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.manage:hover {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}

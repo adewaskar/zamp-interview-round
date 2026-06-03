@@ -1,0 +1,45 @@
+{
+  "name": "scout",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:next": "next dev",
+    "db": "mongod --dbpath ./.mongo --port 27017 --bind_ip 127.0.0.1 --nounixsocket",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^3.0.0",
+    "@ant-design/icons": "^5.6.1",
+    "@ant-design/nextjs-registry": "^1.0.2",
+    "ai": "^6.0.0",
+    "antd": "^5.27.1",
+    "mongoose": "^8.17.2",
+    "next": "15.5.7",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "unpdf": "^1.6.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.7",
+    "mongodb-memory-server": "^10.1.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5",
+    "vitest": "^3.0.5"
+  }
+}

@@ -15,18 +15,7 @@ export interface AgentDTO {
   updatedAt: string;
 }
 
-export interface CreateAgentBody {
-  name: string;
-  /** Optional; auto-derived from `name` when omitted. */
-  slug?: string;
-  description: string;
-  instructions: string;
-  tools?: ToolId[];
-  model?: string;
-  enabled?: boolean;
-}
-
-export type UpdateAgentBody = Partial<CreateAgentBody>;
+export type { CreateAgentBody, UpdateAgentBody } from "@/lib/schemas/agent";
 
 /** Lightweight row for the chat sidebar list. */
 export interface SessionListItem {

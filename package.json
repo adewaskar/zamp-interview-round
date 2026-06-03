@@ -18,6 +18,7 @@
     "@ai-sdk/openai": "^3.0.0",
     "@ant-design/icons": "^5.6.1",
     "@ant-design/nextjs-registry": "^1.0.2",
+    "@highstack/antd-utils": "^1.0.3",
     "ai": "^6.0.0",
     "antd": "^5.27.1",
     "mongoose": "^8.17.2",
@@ -26,6 +27,7 @@
     "react-dom": "19.1.0",
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
+    "styled-components": "^6.4.2",
     "unpdf": "^1.6.2",
     "zod": "^3.25.76"
   },

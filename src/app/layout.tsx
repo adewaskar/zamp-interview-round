@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { ConfigProvider } from "antd";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/config";
-import { theme } from "@/lib/theme";
-import "./globals.css";
+import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: APP_NAME,
@@ -19,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AntdRegistry>
-          <ConfigProvider theme={theme}>{children}</ConfigProvider>
+          <Providers>{children}</Providers>
         </AntdRegistry>
       </body>
     </html>

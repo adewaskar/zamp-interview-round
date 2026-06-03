@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { App, Layout } from "antd";
+import { App, ConfigProvider, Space, theme as antdTheme } from "antd";
+import { TeamOutlined } from "@ant-design/icons";
+import { useDrawer } from "@highstack/antd-utils";
 import type { ChatMessage, MessagePart } from "@/lib/types/parts";
 import type { SessionDTO, SessionListItem } from "@/lib/types/api";
 import { api } from "@/lib/client/api";
@@ -9,21 +11,23 @@ import {
   optimisticUserMessage,
   useChatStream,
 } from "@/lib/client/useChatStream";
+import { BRAND_PRIMARY } from "@/lib/theme";
+import { TokenThemeBridge } from "@/lib/styled/TokenThemeBridge";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatWindow } from "@/components/ChatWindow";
 import { AgentManager } from "@/components/AgentManager";
-import styles from "./page.module.css";
-
-const { Sider, Content } = Layout;
+import { Shell, Rail, Main } from "./page.styles";
 
 /**
  * Scout workspace. Owns all client state and orchestrates the composed
  * sub-components: session sidebar, chat window, and the sub-agent manager.
- * Wrapped in antd's `<App>` so descendants can use `App.useApp()` for
- * context-aware `message`/`modal` (the root layout only provides ConfigProvider).
+ * The antd `<App>` (for context-aware `message`/`modal`) and the imperative
+ * modal/drawer provider live in the root layout, so this tree can freely use
+ * `App.useApp()` and `useDrawer()`.
  */
 function Workspace() {
   const { message } = App.useApp();
+  const { openDrawer } = useDrawer();
   const chat = useChatStream();
 
   // ----- sessions -----
@@ -37,8 +41,6 @@ function Workspace() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loadingSession, setLoadingSession] = useState(false);
   const [awaitingFirstToken, setAwaitingFirstToken] = useState(false);
-
-  const [agentsOpen, setAgentsOpen] = useState(false);
 
   // Guards against a stale session-load resolving after the user switched away.
   const loadTokenRef = useRef(0);
@@ -181,22 +183,47 @@ function Workspace() {
     [activeId, chat, loadSessions, message, upsertAssistant],
   );
 
-  return (
-    <Layout className={styles.layout} hasSider>
-      <Sider width={280} className={styles.sider} theme="dark">
-        <Sidebar
-          sessions={sessions}
-          activeId={activeId}
-          loading={sessionsLoading}
-          creating={creating}
-          onNewChat={newChat}
-          onSelect={selectSession}
-          onDelete={deleteSession}
-          onManageAgents={() => setAgentsOpen(true)}
-        />
-      </Sider>
+  // Open the sub-agent manager as an imperative drawer (@highstack/antd-utils).
+  const openAgents = useCallback(() => {
+    openDrawer(<AgentManager />, {
+      title: (
+        <Space>
+          <TeamOutlined />
+          <span>Sub-agents</span>
+        </Space>
+      ),
+      width: 520,
+      destroyOnHidden: true,
+    });
+  }, [openDrawer]);
 
-      <Content className={styles.content}>
+  return (
+    <Shell hasSider>
+      <Rail width={280} theme="dark">
+        {/* The rail's contents are themed dark via a nested ConfigProvider; the
+            same styled components then resolve dark tokens through the bridge. */}
+        <ConfigProvider
+          theme={{
+            algorithm: antdTheme.darkAlgorithm,
+            token: { colorPrimary: BRAND_PRIMARY },
+          }}
+        >
+          <TokenThemeBridge>
+            <Sidebar
+              sessions={sessions}
+              activeId={activeId}
+              loading={sessionsLoading}
+              creating={creating}
+              onNewChat={newChat}
+              onSelect={selectSession}
+              onDelete={deleteSession}
+              onManageAgents={openAgents}
+            />
+          </TokenThemeBridge>
+        </ConfigProvider>
+      </Rail>
+
+      <Main>
         <ChatWindow
           session={session}
           messages={messages}
@@ -204,23 +231,14 @@ function Workspace() {
           streaming={chat.streaming}
           awaitingFirstToken={awaitingFirstToken}
           onSend={sendMessage}
-          onManageAgents={() => setAgentsOpen(true)}
+          onManageAgents={openAgents}
           onNewChat={newChat}
         />
-      </Content>
-
-      <AgentManager
-        open={agentsOpen}
-        onClose={() => setAgentsOpen(false)}
-      />
-    </Layout>
+      </Main>
+    </Shell>
   );
 }
 
 export default function Page() {
-  return (
-    <App className={styles.app}>
-      <Workspace />
-    </App>
-  );
+  return <Workspace />;
 }

@@ -10,8 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
@@ -33,15 +33,14 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.60.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "15.5.7",
-    "mongodb-memory-server": "^10.1.4",
     "tsx": "^4.19.2",
-    "typescript": "^5",
-    "vitest": "^3.0.5"
+    "typescript": "^5"
   }
 }

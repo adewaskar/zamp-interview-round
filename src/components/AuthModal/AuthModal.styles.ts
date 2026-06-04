@@ -41,10 +41,45 @@ export const Subtitle = styled.p`
   font-size: 13px;
 `;
 
-/** Modal title row: brand on the left, the light/dark toggle on the right. */
+/**
+ * Modal title row: brand on the left, the light/dark toggle on the right.
+ * The hairline below it separates the branded header from the form body.
+ */
 export const TitleBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${({ theme }) => theme.padding}px;
+  padding-bottom: ${({ theme }) => theme.paddingSM}px;
+  border-bottom: 1px solid ${({ theme }) => theme.colorBorderSecondary};
+`;
+
+/** Small reassurance line under the submit button (lock icon + copy). */
+export const SecurityNote = styled.p`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0 0;
+  color: ${({ theme }) => theme.colorTextTertiary};
+  font-size: 12px;
+
+  .anticon {
+    font-size: 12px;
+  }
+`;
+
+/** Subtle "explore with the demo account" helper (login mode only). */
+export const DemoHint = styled.div`
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed ${({ theme }) => theme.colorBorderSecondary};
+  text-align: center;
+  font-size: 13px;
+  color: ${({ theme }) => theme.colorTextSecondary};
+
+  .ant-btn {
+    padding: 0 4px;
+    font-size: 13px;
+  }
 `;

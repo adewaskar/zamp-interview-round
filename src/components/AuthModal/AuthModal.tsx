@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { App, Button, Form, Input, Modal, Segmented, Switch } from "antd";
-import { BulbFilled, BulbOutlined, CompassFilled } from "@ant-design/icons";
+import {
+  BulbFilled,
+  BulbOutlined,
+  CompassFilled,
+  LockOutlined,
+} from "@ant-design/icons";
 import { useForm } from "@highstack/antd-utils";
 import {
   loginSchema,
@@ -18,12 +23,17 @@ import {
   BrandHeader,
   BrandLogo,
   BrandName,
+  DemoHint,
   ModeToggleWrap,
+  SecurityNote,
   Subtitle,
   TitleBar,
 } from "./AuthModal.styles";
 
 type Mode = "login" | "signup";
+
+const DEMO_EMAIL = "demo@scout.app";
+const DEMO_PASSWORD = "demodemo";
 
 /**
  * Blocking authentication dialog. It cannot be dismissed (no close, mask click,
@@ -31,9 +41,9 @@ type Mode = "login" | "signup";
  *
  * A single always-mounted antd form switches between modes (the optional name
  * field only shows for sign-up); the zod schema for the active mode drives both
- * the inline `rules` and the submit-time `validateFields()`. Submission goes
- * through the Button's `onClick` (not the form's `onFinish`) so it never
- * depends on native form-submit wiring.
+ * the inline `rules` and the submit-time `validateFields()`. The submit button
+ * uses `htmlType="submit"` so the form's `onFinish` fires on both click and
+ * Enter.
  */
 export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
   const { message } = App.useApp();
@@ -46,6 +56,10 @@ export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
   const switchMode = (next: Mode) => {
     setMode(next);
     form.resetFields();
+  };
+
+  const fillDemo = () => {
+    form.setFieldsValue({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
   };
 
   const submit = async () => {
@@ -80,6 +94,7 @@ export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
     <Modal
       open
       centered
+      width={420}
       mask={false}
       closable={false}
       maskClosable={false}
@@ -126,6 +141,7 @@ export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
         {mode === "signup" && (
           <Form.Item name="name" label="Name" rules={rules.name}>
             <Input
+              size="large"
               autoComplete="name"
               placeholder="Your name (optional)"
               aria-label="Name"
@@ -134,6 +150,7 @@ export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
         )}
         <Form.Item name="email" label="Email" rules={rules.email}>
           <Input
+            size="large"
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
@@ -142,14 +159,35 @@ export function AuthModal({ onAuthed }: { onAuthed: (user: UserDTO) => void }) {
         </Form.Item>
         <Form.Item name="password" label="Password" rules={rules.password}>
           <Input.Password
+            size="large"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             placeholder={mode === "login" ? "Your password" : "At least 8 characters"}
             aria-label="Password"
           />
         </Form.Item>
-        <Button type="primary" onClick={submit} block loading={submitting}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          size="large"
+          block
+          loading={submitting}
+        >
           {mode === "login" ? "Log in" : "Create account"}
         </Button>
+
+        <SecurityNote>
+          <LockOutlined />
+          Protected by an encrypted, httpOnly session.
+        </SecurityNote>
+
+        {mode === "login" && (
+          <DemoHint>
+            Just exploring?
+            <Button type="link" onClick={fillDemo}>
+              Use the demo account
+            </Button>
+          </DemoHint>
+        )}
       </Form>
     </Modal>
   );

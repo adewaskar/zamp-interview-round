@@ -27,9 +27,14 @@ test.describe("authentication", () => {
     ).toBeVisible();
     await expect(page.getByRole("dialog")).toHaveCount(0);
 
-    // Log out → the gate returns.
+    // Log out → confirm in the dialog → the gate returns.
     await page.getByRole("button", { name: "Log out" }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
+    const confirmDialog = page
+      .getByRole("dialog")
+      .filter({ hasText: "Log out of Scout?" });
+    await expect(confirmDialog).toBeVisible();
+    await confirmDialog.getByRole("button", { name: "Log out" }).click();
+    await expect(page.getByText(/Welcome back/i)).toBeVisible();
 
     // Log back in with the same credentials.
     await page.getByRole("textbox", { name: "Email" }).fill(email);

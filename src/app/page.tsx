@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { App, ConfigProvider, Space, Spin, theme as antdTheme } from "antd";
-import { TeamOutlined } from "@ant-design/icons";
+import { LogoutOutlined, TeamOutlined } from "@ant-design/icons";
 import { useDrawer } from "@highstack/antd-utils";
 import type { ChatMessage, MessagePart } from "@/lib/types/parts";
 import type { SessionDTO, SessionListItem, UserDTO } from "@/lib/types/api";
@@ -18,7 +18,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { ChatWindow } from "@/components/ChatWindow";
 import { AgentManager } from "@/components/AgentManager";
 import { AuthModal } from "@/components/AuthModal";
-import { Shell, Rail, Main, AuthBackdrop } from "./page.styles";
+import { Shell, Rail, Main, AuthBackdrop, AuthGrid } from "./page.styles";
 
 /**
  * Scout workspace. Owns all client state and orchestrates the composed
@@ -38,9 +38,24 @@ function Workspace({
   user: UserDTO;
   onLogout: () => void;
 }) {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const { openDrawer } = useDrawer();
   const chat = useChatStream();
+
+  // Logging out is a context switch (it tears down the workspace), so confirm
+  // first. The dialog comes from the root `App`, so it tracks the app theme.
+  const confirmLogout = useCallback(() => {
+    modal.confirm({
+      title: "Log out of Scout?",
+      icon: <LogoutOutlined />,
+      content: "You'll need to sign back in to reach your chats and sub-agents.",
+      okText: "Log out",
+      cancelText: "Cancel",
+      okButtonProps: { danger: true },
+      centered: true,
+      onOk: onLogout,
+    });
+  }, [modal, onLogout]);
 
   // ----- sessions -----
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
@@ -231,7 +246,7 @@ function Workspace({
               onDelete={deleteSession}
               onManageAgents={openAgents}
               user={user}
-              onLogout={onLogout}
+              onLogout={confirmLogout}
             />
           </TokenThemeBridge>
         </ConfigProvider>
@@ -306,6 +321,24 @@ function AuthGate() {
     // (in AuthModal) flips it like the rest of the app.
     return (
       <AuthBackdrop>
+        <AuthGrid aria-hidden focusable="false" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern
+              id="auth-grid"
+              width="44"
+              height="44"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M44 0H0V44"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#auth-grid)" />
+        </AuthGrid>
         <AuthModal onAuthed={setUser} />
       </AuthBackdrop>
     );

@@ -25,11 +25,14 @@ export const Main = styled(Content)`
 `;
 
 /**
- * Full-viewport backdrop behind the auth modal: the near-black brand surface
- * lit by soft brand-colored glows. All colors derive from antd tokens (read
- * through the dark bridge), so it tracks the theme.
+ * Full-viewport backdrop behind the auth modal: the brand surface lit by soft
+ * brand-colored glows. All colors derive from antd tokens (read through the
+ * theme bridge), so it tracks light/dark automatically. A faint SVG grid
+ * (`AuthGrid`) sits on top of this for texture.
  */
 export const AuthBackdrop = styled.div`
+  position: relative;
+  overflow: hidden;
   height: 100dvh;
   display: flex;
   align-items: center;
@@ -47,4 +50,32 @@ export const AuthBackdrop = styled.div`
       transparent 50%
     ),
     ${({ theme }) => theme.colorBgLayout};
+`;
+
+/**
+ * Decorative full-bleed grid drawn behind the auth modal. Stroke color is a
+ * low-alpha mix of the foreground token so it reads in both themes, and a
+ * radial mask fades the grid out toward the center so it never competes with
+ * the modal. Purely ornamental — hidden from assistive tech, no pointer events.
+ */
+export const AuthGrid = styled.svg`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  color: ${({ theme }) =>
+    `color-mix(in srgb, ${theme.colorBorder} 70%, transparent)`};
+  -webkit-mask-image: radial-gradient(
+    120% 95% at 50% 42%,
+    transparent 0%,
+    transparent 35%,
+    #000 78%
+  );
+  mask-image: radial-gradient(
+    120% 95% at 50% 42%,
+    transparent 0%,
+    transparent 35%,
+    #000 78%
+  );
 `;
